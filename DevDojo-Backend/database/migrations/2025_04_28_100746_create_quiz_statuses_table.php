@@ -11,8 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        
         Schema::create('quiz_statuses', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('student_id')
+                  ->constrained('users')
+                  ->cascadeOnDelete();
+            $table->foreignId('quiz_id')
+                  ->constrained('quizzes')
+                  ->cascadeOnDelete();
+            $table->boolean('passed')->default(false);
+            $table->unique(['student_id', 'quiz_id']);
             $table->timestamps();
         });
     }
