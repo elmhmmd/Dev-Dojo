@@ -32,4 +32,4 @@ class Node extends Model
     {
         return $this->hasMany(Resource::class);
     }
-}
+}   
