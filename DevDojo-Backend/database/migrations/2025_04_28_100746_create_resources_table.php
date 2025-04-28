@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('node_id');
+            $table->string('link');
+            $table->foreign('node_id')->references('id')->on('nodes')->onDelete('cascade');
             $table->timestamps();
         });
     }
