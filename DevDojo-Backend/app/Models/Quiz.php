@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Quiz extends Model
 {
+
+    use HasFactory;
+    
     protected $fillable = ['node_id', 'time_limit'];
 
     public function node()
