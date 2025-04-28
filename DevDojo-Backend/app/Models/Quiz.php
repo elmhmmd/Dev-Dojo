@@ -9,7 +9,7 @@ class Quiz extends Model
 {
 
     use HasFactory;
-    
+
     protected $fillable = ['node_id', 'time_limit'];
 
     public function node()
