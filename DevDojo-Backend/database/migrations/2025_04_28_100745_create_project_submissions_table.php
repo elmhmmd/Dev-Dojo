@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('project_submissions', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('project_id');
+            $table->unsignedBigInteger('student_id');
+            $table->string('link');
+            $table->integer('score')->default(0);
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
