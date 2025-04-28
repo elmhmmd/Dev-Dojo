@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class QuizStatus extends Model
 {
+    use HasFactor;
+    
     protected $fillable = ['student_id', 'quiz_id', 'passed'];
-
-    protected $primaryKey = ['student_id', 'quiz_id'];
-
-    public $incrementing = false;
 
     public function student()
     {
