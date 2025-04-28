@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('nodes', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('roadmap_id');
+            $table->string('title');
+            $table->text('short_description')->nullable();
+            $table->text('long_description')->nullable();
+            $table->string('icon')->nullable();
+            $table->foreign('roadmap_id')->references('id')->on('roadmaps')->onDelete('cascade');
             $table->timestamps();
         });
     }
