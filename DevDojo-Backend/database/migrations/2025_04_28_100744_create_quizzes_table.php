@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('quizzes', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('node_id');
+            $table->integer('time_limit')->nullable(); // In minutes
+            $table->foreign('node_id')->references('id')->on('nodes')->onDelete('cascade');
             $table->timestamps();
         });
     }
