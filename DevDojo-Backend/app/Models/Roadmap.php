@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Roadmap extends Model
 {
-    protected $fillable = ['title', 'created_by'];
+    protected $fillable = ['title', 'created_by', 'published'];
 
     public function creator()
     {
