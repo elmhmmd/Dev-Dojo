@@ -14,8 +14,11 @@ class RoadmapController extends Controller
 
     public function index()
     {
-        $roadmaps = Roadmap::with('nodes')->get();
-        return response()->json($roadmaps);
+
+    $roadmaps = Roadmap::select('id', 'title')->get();
+
+    return response()->json($roadmaps);
+
     }
 
     public function store(Request $request)

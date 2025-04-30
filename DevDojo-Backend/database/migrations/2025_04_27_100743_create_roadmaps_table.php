@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('roadmaps', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->unsignedBigInteger('created_by'); 
+            $table->unsignedBigInteger('created_by');
+            $table->boolean('published')->default(false); 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
