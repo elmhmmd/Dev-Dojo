@@ -42,7 +42,7 @@ class QuestionController extends Controller
 
         $question->update($validated);
 
-        return response()->json($question);
+        return response()->json($question, 200);
     }
 
     public function destroy($roadmapId, $nodeId, $quizId, $questionId)
@@ -50,6 +50,6 @@ class QuestionController extends Controller
         $question = Question::findOrFail($questionId);
         $question->delete();
 
-        return response()->json(['message' => 'Question deleted']);
+        return response()->json(['message' => 'Question deleted'], 200);
     }
 }
