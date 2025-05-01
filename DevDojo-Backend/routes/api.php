@@ -2,6 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RoadmapController;
+use App\Http\Controllers\NodeController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\OptionController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\KeyLearningObjectiveController;
+use App\Http\Controllers\ResourceController;
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
