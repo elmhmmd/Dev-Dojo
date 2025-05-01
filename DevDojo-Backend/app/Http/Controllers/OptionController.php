@@ -62,6 +62,6 @@ class OptionController extends Controller
         $option = Option::findOrFail($optionId);
         $option->delete();
 
-        return response()->json(['message' => 'Option deleted']);
+        return response()->json(['message' => 'Option deleted'],200);
     }
 }
