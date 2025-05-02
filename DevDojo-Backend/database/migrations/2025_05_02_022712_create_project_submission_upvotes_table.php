@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->foreign('project_submission_id')->references('id')->on('project_submissions')->onDelete('cascade');
             $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unique(['project_submission_id', 'student_id']);
+            $table->unique(['project_submission_id', 'student_id'], "psu_submission_student_unique");
             $table->timestamps();
         });
     }
