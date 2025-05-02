@@ -17,4 +17,9 @@ class ProjectSubmission extends Model
     {
         return $this->belongsTo(User::class, 'student_id');
     }
+
+    public function upvotes()
+    {
+        return $this->hasMany(ProjectSubmissionUpvote::class);
+    }
 }

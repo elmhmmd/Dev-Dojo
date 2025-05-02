@@ -13,16 +13,21 @@ class RoadmapController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api', 'admin']);
+        $this->middleware('auth:api');
+
+        $this->middleware('admin')
+             ->except(['index', 'show']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        if (auth()->user()->role_id === 1) {
+            $roadmaps = Roadmap::select('id', 'title', 'published')->get();
+        } else {
+            $roadmaps = Roadmap::select('id', 'title')->where('published', true)->get();
+        }
 
-    $roadmaps = Roadmap::select('id', 'title')->get();
-
-    return response()->json($roadmaps);
-
+        return response()->json($roadmaps, 200);
     }
 
     public function store(Request $request)
@@ -42,7 +47,7 @@ class RoadmapController extends Controller
     public function show($id)
     {
         $roadmap = Roadmap::with('nodes')->findOrFail($id);
-        return response()->json($roadmap);
+        return response()->json($roadmap, 200);
     }
 
     public function update(Request $request, $id)
@@ -55,7 +60,7 @@ class RoadmapController extends Controller
 
         $roadmap->update($validated);
 
-        return response()->json($roadmap);
+        return response()->json($roadmap, 200);
     }
 
     public function destroy($id)
@@ -63,7 +68,7 @@ class RoadmapController extends Controller
         $roadmap = Roadmap::findOrFail($id);
         $roadmap->delete();
 
-        return response()->json(['message' => 'Roadmap deleted']);
+        return response()->json(['message' => 'Roadmap deleted'], 200);
     }
 
     public function publish($id)
@@ -109,6 +114,6 @@ class RoadmapController extends Controller
 
         $roadmap->update(['published' => true]);
 
-        return response()->json(['message' => 'Roadmap published successfully']);
+        return response()->json(['message' => 'Roadmap published successfully'], 200);
     }
 }
