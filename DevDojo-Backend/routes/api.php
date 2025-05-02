@@ -19,3 +19,33 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
     });
 });
+
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('roadmaps', RoadmapController::class);
+    Route::post('roadmaps/{roadmap}/publish', [RoadmapController::class, 'publish']);
+    Route::prefix('roadmaps/{roadmap}')->group(function () {
+        Route::post('nodes', [NodeController::class, 'store']);
+        Route::put('nodes/{node}', [NodeController::class, 'update']);
+        Route::delete('nodes/{node}', [NodeController::class, 'destroy']);
+        Route::prefix('nodes/{node}')->group(function () {
+            Route::post('quiz', [QuizController::class, 'store']);
+            Route::put('quiz/{quiz}', [QuizController::class, 'update']);
+            Route::delete('quiz/{quiz}', [QuizController::class, 'destroy']);
+            Route::post('quiz/{quiz}/questions', [QuestionController::class, 'store']);
+            Route::put('quiz/{quiz}/questions/{question}', [QuestionController::class, 'update']);
+            Route::delete('quiz/{quiz}/questions/{question}', [QuestionController::class, 'destroy']);
+            Route::post('quiz/{quiz}/questions/{question}/options', [OptionController::class, 'store']);
+            Route::put('quiz/{quiz}/questions/{question}/options/{option}', [OptionController::class, 'update']);
+            Route::delete('quiz/{quiz}/questions/{question}/options/{option}', [OptionController::class, 'destroy']);
+            Route::post('project', [ProjectController::class, 'store']);
+            Route::put('project/{project}', [ProjectController::class, 'update']);
+            Route::delete('project/{project}', [ProjectController::class, 'destroy']);
+            Route::post('key-learning-objectives', [KeyLearningObjectiveController::class, 'store']);
+            Route::put('key-learning-objectives/{objective}', [KeyLearningObjectiveController::class, 'update']);
+            Route::delete('key-learning-objectives/{objective}', [KeyLearningObjectiveController::class, 'destroy']);
+            Route::post('resources', [ResourceController::class, 'store']);
+            Route::put('resources/{resource}', [ResourceController::class, 'update']);
+            Route::delete('resources/{resource}', [ResourceController::class, 'destroy']);
+        });
+    });
+});
