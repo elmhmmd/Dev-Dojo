@@ -13,63 +13,60 @@ class OptionController extends Controller
         $this->middleware(['auth:api', 'admin']);
     }
 
-    public function store(Request $request, $roadmapId, $nodeId, $quizId, $questionId)
-{
-    $question = Question::findOrFail($questionId);
-
-    
-    $existing = $question->options()->count();
-    $toAdd    = $request->input('options', []);
-    if ($existing + count($toAdd) > 4) {
-        return response()->json(
-            ['error' => 'Total options cannot exceed 4'],
-            422
-        );
-    }
-
-    
-    $validated = $request->validate([
-        'options'               => 'required|array|min:1|max:4',
-        'options.*.body'        => 'required|string',
-        'options.*.is_correct'  => 'required|boolean',
-    ]);
-
-    
-    if (collect($validated['options'])->pluck('is_correct')->contains(true)) {
-        $question->options()->update(['is_correct' => false]);
-    }
-
-    
-    $created = [];
-    foreach ($validated['options'] as $opt) {
-        $created[] = Option::create([
-            'question_id' => $questionId,
-            'body'        => $opt['body'],
-            'is_correct'  => $opt['is_correct'],
-        ]);
-    }
-
-    return response()->json($created, 201);
-}
-
-
-    public function update(Request $request, $roadmapId, $nodeId, $quizId, $questionId, $optionId)
+    public function index($roadmapId, $nodeId, $quizId, $questionId)
     {
-        $option = Option::findOrFail($optionId);
+        $question = Question::findOrFail($questionId);
+        $options = $question->options;
+        return response()->json($options);
+    }
+
+    public function bulkSync(Request $request, $roadmapId, $nodeId, $quizId, $questionId)
+    {
+        $question = Question::findOrFail($questionId);
 
         $validated = $request->validate([
-            'body' => 'required|string',
-            'is_correct' => 'required|boolean',
+            'options' => 'required|array|size:4',
+            'options.*.id' => 'nullable|exists:options,id',
+            'options.*.body' => 'required|string',
+            'options.*.is_correct' => 'required|boolean',
         ]);
 
-        if ($validated['is_correct']) {
-            $question = $option->question;
-            $question->options()->where('id', '!=', $optionId)->update(['is_correct' => false]);
+        $incoming = collect($validated['options']);
+
+        if ($incoming->where('is_correct', true)->count() !== 1) {
+            return response()->json(['error' => 'Exactly one option must be marked correct'], 422);
         }
 
-        $option->update($validated);
+        $existingIds = $question->options()->pluck('id')->all();
+        $incomingIds = $incoming->pluck('id')->filter()->all();
 
-        return response()->json($option, 200);
+        $toDelete = array_diff($existingIds, $incomingIds);
+        if (!empty($toDelete)) {
+            Option::whereIn('id', $toDelete)->delete();
+        }
+
+        $question->options()->update(['is_correct' => false]);
+
+        $synced = [];
+        foreach ($incoming as $opt) {
+            if (isset($opt['id'])) {
+                $option = Option::findOrFail($opt['id']);
+                $option->update([
+                    'body' => $opt['body'],
+                    'is_correct' => $opt['is_correct'],
+                ]);
+            } else {
+                $option = Option::create([
+                    'question_id' => $questionId,
+                    'body' => $opt['body'],
+                    'is_correct' => $opt['is_correct'],
+                ]);
+            }
+            $synced[] = $option;
+        }
+
+        $fresh = $question->options()->get();
+        return response()->json($fresh);
     }
 
     public function destroy($roadmapId, $nodeId, $quizId, $questionId, $optionId)
@@ -77,6 +74,6 @@ class OptionController extends Controller
         $option = Option::findOrFail($optionId);
         $option->delete();
 
-        return response()->json(['message' => 'Option deleted'],200);
+        return response()->json(['message' => 'Option deleted']);
     }
 }
