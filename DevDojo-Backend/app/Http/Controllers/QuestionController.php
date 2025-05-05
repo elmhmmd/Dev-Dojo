@@ -17,7 +17,7 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quizId);
         $questions = $quiz->questions;
-        return response()->json($questions);
+        return response()->json($questions, 200);
     }
 
     public function bulkSync(Request $request, $roadmapId, $nodeId, $quizId)
@@ -54,7 +54,7 @@ class QuestionController extends Controller
         }
 
         $fresh = $quiz->questions()->get();
-        return response()->json($fresh);
+        return response()->json($fresh, 200);
     }
 
     public function destroy($roadmapId, $nodeId, $quizId, $questionId)

@@ -12,6 +12,12 @@ class KeyLearningObjectiveController extends Controller
         $this->middleware(['auth:api', 'admin']);
     }
 
+    public function index($roadmapId, $nodeId)
+    {
+        $objectives = KeyLearningObjective::where('node_id', $nodeId)->get();
+        return response()->json($objectives, 200);
+    }
+
     public function store(Request $request, $roadmapId, $nodeId)
     {
         $validated = $request->validate([
