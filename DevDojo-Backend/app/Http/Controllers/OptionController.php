@@ -17,7 +17,7 @@ class OptionController extends Controller
     {
         $question = Question::findOrFail($questionId);
         $options = $question->options;
-        return response()->json($options);
+        return response()->json($options, 200);
     }
 
     public function bulkSync(Request $request, $roadmapId, $nodeId, $quizId, $questionId)

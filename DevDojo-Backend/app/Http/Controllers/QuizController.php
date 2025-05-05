@@ -13,34 +13,36 @@ class QuizController extends Controller
         $this->middleware(['auth:api', 'admin']);
     }
 
-    public function store(Request $request, $roadmapId, $nodeId)
+    public function index($roadmapId, $nodeId)
     {
         $node = Node::findOrFail($nodeId);
-        if ($node->quiz) {
-            return response()->json(['error' => 'Node already has a quiz'], 422);
-        }
-
-        $validated = $request->validate([
-            'time_limit' => 'nullable|integer',
-        ]);
-
-        $quiz = Quiz::create([
-            'node_id' => $nodeId,
-            'time_limit' => $validated['time_limit'] ?? null,
-        ]);
-
-        return response()->json($quiz, 201);
+        $quiz = $node->quiz;
+        return response()->json($quiz ?: []);
     }
 
-    public function update(Request $request, $roadmapId, $nodeId, $quizId)
+    public function bulkSync(Request $request, $roadmapId, $nodeId)
     {
-        $quiz = Quiz::findOrFail($quizId);
+        $node = Node::findOrFail($nodeId);
 
         $validated = $request->validate([
+            'id' => 'nullable|exists:quizzes,id',
             'time_limit' => 'nullable|integer',
         ]);
 
-        $quiz->update($validated);
+        if ($validated['id']) {
+            $quiz = Quiz::findOrFail($validated['id']);
+            $quiz->update([
+                'time_limit' => $validated['time_limit'],
+            ]);
+        } else {
+            if ($node->quiz) {
+                $node->quiz->delete();
+            }
+            $quiz = Quiz::create([
+                'node_id' => $nodeId,
+                'time_limit' => $validated['time_limit'],
+            ]);
+        }
 
         return response()->json($quiz);
     }
