@@ -15,6 +15,9 @@ class EnsureStudent
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (auth()->user()->role_id !== 2) {
+            return response()->json(['error' => 'Unauthorized: Student access required'], 403);
+        }
         return $next($request);
     }
 }
