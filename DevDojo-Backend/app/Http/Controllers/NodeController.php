@@ -51,7 +51,7 @@ class NodeController extends Controller
 
         $node->update($validated);
 
-        return response()->json($node);
+        return response()->json($node, 200);
     }
 
     public function destroy($roadmapId, $nodeId)
