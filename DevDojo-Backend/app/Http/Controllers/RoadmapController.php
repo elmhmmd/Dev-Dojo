@@ -56,6 +56,7 @@ class RoadmapController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'published' => 'required|boolean',
         ]);
 
         $roadmap->update($validated);
@@ -115,5 +116,13 @@ class RoadmapController extends Controller
         $roadmap->update(['published' => true]);
 
         return response()->json(['message' => 'Roadmap published successfully'], 200);
+    }
+    
+    public function unpublish($id)
+    {
+        $roadmap = Roadmap::findOrFail($id);
+        $roadmap->update(['published' => false]);
+
+        return response()->json(['message' => 'Roadmap unpublished successfully']);
     }
 }
