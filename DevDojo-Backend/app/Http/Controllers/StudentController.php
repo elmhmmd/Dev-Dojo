@@ -48,16 +48,13 @@ class StudentController extends Controller
 
         foreach ($nodes as $index => $node) {
             if ($index === 0) {
-                // First node is always unlocked
                 $unlockedNodes[] = $node;
             } else {
-                // Check if previous node is completed
                 $previousNode = $nodes[$index - 1];
                 $quizPassed = QuizStatus::where('student_id', $user->id)
                     ->where('quiz_id', $previousNode->quiz->id)
                     ->where('passed', true)
                     ->exists();
-
                 $projectSubmission = ProjectSubmission::where('student_id', $user->id)
                     ->where('project_id', $previousNode->project->id)
                     ->first();
@@ -70,7 +67,7 @@ class StudentController extends Controller
             }
         }
 
-        return response()->json($unlockedNodes);
+        return response()->json($unlockedNodes, 200);
     }
 
     public function takeQuiz(Request $request, $roadmapId, $nodeId, $quizId)
@@ -80,13 +77,11 @@ class StudentController extends Controller
         $node = Node::findOrFail($nodeId);
         $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
 
-        // Verify node is unlocked
         $unlockedNodes = $this->viewUnlockedNodes($roadmapId)->getData();
         if (!collect($unlockedNodes)->pluck('id')->contains($nodeId)) {
             return response()->json(['error' => 'Node is not unlocked'], 403);
         }
 
-        // Validate answers
         $validated = $request->validate([
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:questions,id',
@@ -101,7 +96,7 @@ class StudentController extends Controller
             }
         }
 
-        $passed = $correctAnswers >= 7; // 70% passing threshold
+        $passed = $correctAnswers >= 7;
 
         QuizStatus::updateOrCreate(
             ['student_id' => $user->id, 'quiz_id' => $quizId],
@@ -122,8 +117,9 @@ class StudentController extends Controller
         $node = Node::findOrFail($nodeId);
         $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
 
-        // Verify node is unlocked
+        
         $unlockedNodes = $this->viewUnlockedNodes($roadmapId)->getData();
+
         if (!collect($unlockedNodes)->pluck('id')->contains($nodeId)) {
             return response()->json(['error' => 'Node is not unlocked'], 403);
         }
@@ -170,6 +166,6 @@ class StudentController extends Controller
         $submission->score = $submission->upvotes()->count();
         $submission->save();
 
-        return response()->json(['message' => 'Upvote recorded', 'new_score' => $submission->score]);
+        return response()->json(['message' => 'Upvote recorded', 'new_score' => $submission->score], 200);
     }
 }
