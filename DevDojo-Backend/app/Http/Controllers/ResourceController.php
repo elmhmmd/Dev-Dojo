@@ -12,6 +12,12 @@ class ResourceController extends Controller
         $this->middleware(['auth:api', 'admin']);
     }
 
+    public function index($roadmapId, $nodeId)
+    {
+        $resources = Resource::where('node_id', $nodeId)->get();
+        return response()->json($resources, 200);
+    }
+
     public function store(Request $request, $roadmapId, $nodeId)
     {
         $validated = $request->validate([
@@ -41,9 +47,9 @@ class ResourceController extends Controller
 
     public function destroy($roadmapId, $nodeId, $resourceId)
     {
-        $resource = Resource::findOrFail($resourceId, 200);
+        $resource = Resource::findOrFail($resourceId);
         $resource->delete();
 
-        return response()->json(['message' => 'Resource deleted']);
+        return response()->json(['message' => 'Resource deleted'], 200);
     }
 }
