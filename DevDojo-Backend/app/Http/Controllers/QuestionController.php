@@ -13,36 +13,48 @@ class QuestionController extends Controller
         $this->middleware(['auth:api', 'admin']);
     }
 
-    public function store(Request $request, $roadmapId, $nodeId, $quizId)
+    public function index($roadmapId, $nodeId, $quizId)
     {
         $quiz = Quiz::findOrFail($quizId);
-        if ($quiz->questions->count() >= 10) {
-            return response()->json(['error' => 'Quiz already has 10 questions'], 422);
-        }
-
-        $validated = $request->validate([
-            'body' => 'required|string',
-        ]);
-
-        $question = Question::create([
-            'quiz_id' => $quizId,
-            'body' => $validated['body'],
-        ]);
-
-        return response()->json($question, 201);
+        $questions = $quiz->questions;
+        return response()->json($questions);
     }
 
-    public function update(Request $request, $roadmapId, $nodeId, $quizId, $questionId)
+    public function bulkSync(Request $request, $roadmapId, $nodeId, $quizId)
     {
-        $question = Question::findOrFail($questionId);
+        $quiz = Quiz::findOrFail($quizId);
 
         $validated = $request->validate([
-            'body' => 'required|string',
+            'questions' => 'required|array|size:10',
+            'questions.*.id' => 'nullable|exists:questions,id',
+            'questions.*.body' => 'required|string',
         ]);
 
-        $question->update($validated);
+        $incoming = collect($validated['questions']);
+        $existingIds = $quiz->questions()->pluck('id')->all();
+        $incomingIds = $incoming->pluck('id')->filter()->all();
 
-        return response()->json($question, 200);
+        $toDelete = array_diff($existingIds, $incomingIds);
+        if (!empty($toDelete)) {
+            Question::whereIn('id', $toDelete)->delete();
+        }
+
+        $synced = [];
+        foreach ($incoming as $question) {
+            if (isset($question['id'])) {
+                $q = Question::findOrFail($question['id']);
+                $q->update(['body' => $question['body']]);
+            } else {
+                $q = Question::create([
+                    'quiz_id' => $quizId,
+                    'body' => $question['body'],
+                ]);
+            }
+            $synced[] = $q;
+        }
+
+        $fresh = $quiz->questions()->get();
+        return response()->json($fresh);
     }
 
     public function destroy($roadmapId, $nodeId, $quizId, $questionId)
