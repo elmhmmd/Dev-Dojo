@@ -12,6 +12,12 @@ class NodeController extends Controller
         $this->middleware(['auth:api', 'admin']);
     }
 
+    public function index($roadmapId)
+    {
+        $nodes = Node::where('roadmap_id', $roadmapId)->get();
+        return response()->json($nodes, 200);
+    }
+
     public function store(Request $request, $roadmapId)
     {
         $validated = $request->validate([
