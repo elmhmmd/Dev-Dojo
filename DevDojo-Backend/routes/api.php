@@ -32,26 +32,30 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::apiResource('roadmaps', RoadmapController::class)->except(['index']);
         Route::post('roadmaps/{roadmap}/publish', [RoadmapController::class, 'publish']);
+        Route::post('roadmaps/{roadmap}/unpublish', [RoadmapController::class, 'unpublish']);
         Route::prefix('roadmaps/{roadmap}')->group(function () {
+            Route::get('nodes', [NodeController::class, 'index']);
             Route::post('nodes', [NodeController::class, 'store']);
             Route::put('nodes/{node}', [NodeController::class, 'update']);
             Route::delete('nodes/{node}', [NodeController::class, 'destroy']);
             Route::prefix('nodes/{node}')->group(function () {
-                Route::post('quiz', [QuizController::class, 'store']);
-                Route::put('quiz/{quiz}', [QuizController::class, 'update']);
-                Route::delete('quiz/{quiz}', [QuizController::class, 'destroy']);
-                Route::post('quiz/{quiz}/questions', [QuestionController::class, 'store']);
-                Route::put('quiz/{quiz}/questions/{question}', [QuestionController::class, 'update']);
-                Route::delete('quiz/{quiz}/questions/{question}', [QuestionController::class, 'destroy']);
-                Route::post('quiz/{quiz}/questions/{question}/options', [OptionController::class, 'store']);
-                Route::put('quiz/{quiz}/questions/{question}/options/{option}', [OptionController::class, 'update']);
-                Route::delete('quiz/{quiz}/questions/{question}/options/{option}', [OptionController::class, 'destroy']);
-                Route::post('project', [ProjectController::class, 'store']);
-                Route::put('project/{project}', [ProjectController::class, 'update']);
+                Route::get('project', [ProjectController::class, 'index']);
+                Route::put('project', [ProjectController::class, 'bulkSync']);
                 Route::delete('project/{project}', [ProjectController::class, 'destroy']);
+                Route::get('quiz', [QuizController::class, 'index']);
+                Route::put('quiz', [QuizController::class, 'bulkSync']);
+                Route::delete('quiz/{quiz}', [QuizController::class, 'destroy']);
+                Route::get('quiz/{quiz}/questions', [QuestionController::class, 'index']);
+                Route::put('quiz/{quiz}/questions', [QuestionController::class, 'bulkSync']);
+                Route::delete('quiz/{quiz}/questions/{question}', [QuestionController::class, 'destroy']);
+                Route::get('quiz/{quiz}/questions/{question}/options', [OptionController::class, 'index']);
+                Route::put('quiz/{quiz}/questions/{question}/options', [OptionController::class, 'bulkSync']);
+                Route::delete('quiz/{quiz}/questions/{question}/options/{option}', [OptionController::class, 'destroy']);
+                Route::get('key-learning-objectives', [KeyLearningObjectiveController::class, 'index']);
                 Route::post('key-learning-objectives', [KeyLearningObjectiveController::class, 'store']);
                 Route::put('key-learning-objectives/{objective}', [KeyLearningObjectiveController::class, 'update']);
                 Route::delete('key-learning-objectives/{objective}', [KeyLearningObjectiveController::class, 'destroy']);
+                Route::get('resources', [ResourceController::class, 'index']);
                 Route::post('resources', [ResourceController::class, 'store']);
                 Route::put('resources/{resource}', [ResourceController::class, 'update']);
                 Route::delete('resources/{resource}', [ResourceController::class, 'destroy']);
