@@ -31,7 +31,7 @@ class StudentController extends Controller
 
         $user->roadmaps()->attach($roadmapId);
 
-        return response()->json(['message' => 'Joined roadmap successfully']);
+        return response()->json(['message' => 'Joined roadmap successfully'], 200);
     }
 
     public function viewUnlockedNodes($roadmapId)
@@ -55,6 +55,7 @@ class StudentController extends Controller
                     ->where('quiz_id', $previousNode->quiz->id)
                     ->where('passed', true)
                     ->exists();
+
                 $projectSubmission = ProjectSubmission::where('student_id', $user->id)
                     ->where('project_id', $previousNode->project->id)
                     ->first();
@@ -167,5 +168,90 @@ class StudentController extends Controller
         $submission->save();
 
         return response()->json(['message' => 'Upvote recorded', 'new_score' => $submission->score], 200);
+    }
+
+    public function statistics()
+    {
+        $user = auth()->user();
+
+        $joinedRoadmaps = $user->roadmaps()->count();
+
+        $completedNodes = Node::whereHas('quiz', function ($query) use ($user) {
+            $query->whereHas('quizStatuses', function ($q) use ($user) {
+                $q->where('student_id', $user->id)->where('passed', true);
+            });
+        })->whereHas('project', function ($query) use ($user) {
+            $query->whereHas('submissions', function ($q) use ($user) {
+                $q->where('student_id', $user->id)->where('score', '>=', 5);
+            });
+        })->count();
+
+        
+        $completedRoadmaps = $user->roadmaps()->whereDoesntHave('nodes', function ($query) use ($user) {
+            $query->whereDoesntHave('quiz', function ($q) use ($user) {
+                $q->whereHas('quizStatuses', function ($qs) use ($user) {
+                    $qs->where('student_id', $user->id)->where('passed', true);
+                });
+            })->orWhereDoesntHave('project', function ($q) use ($user) {
+                $q->whereHas('submissions', function ($qs) use ($user) {
+                    $qs->where('student_id', $user->id)->where('score', '>=', 5);
+                });
+            });
+        })->count();
+
+        
+        $quizzesPassed = QuizStatus::where('student_id', $user->id)
+            ->where('passed', true)
+            ->count();
+
+       
+        $projectsCompleted = ProjectSubmission::where('student_id', $user->id)
+            ->where('score', '>=', 5)
+            ->count();
+
+        
+        $totalUpvotes = ProjectSubmission::where('student_id', $user->id)
+            ->sum('score');
+
+        return response()->json([
+            'joined_roadmaps' => $joinedRoadmaps,
+            'total_nodes_completed' => $completedNodes,
+            'total_roadmaps_completed' => $completedRoadmaps,
+            'quizzes_passed' => $quizzesPassed,
+            'projects_completed' => $projectsCompleted,
+            'total_upvotes_gained' => $totalUpvotes,
+        ]);
+    }
+
+    public function roadmapProgress($roadmapId)
+    {
+        $user = auth()->user();
+        $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
+
+        if (!$user->roadmaps()->where('roadmap_id', $roadmapId)->exists()) {
+            return response()->json(['error' => 'You must join the roadmap first'], 403);
+        }
+
+        $totalNodes = $roadmap->nodes()->count();
+
+        $completedNodes = $roadmap->nodes()->whereHas('quiz', function ($query) use ($user) {
+            $query->whereHas('quizStatuses', function ($q) use ($user) {
+                $q->where('student_id', $user->id)->where('passed', true);
+            });
+        })->whereHas('project', function ($query) use ($user) {
+            $query->whereHas('submissions', function ($q) use ($user) {
+                $q->where('student_id', $user->id)->where('score', '>=', 5);
+            });
+        })->count();
+
+        $progressPercentage = $totalNodes > 0 ? ($completedNodes / $totalNodes) * 100 : 0;
+
+        return response()->json([
+            'roadmap_id' => $roadmapId,
+            'roadmap_title' => $roadmap->title,
+            'total_nodes' => $totalNodes,
+            'completed_nodes' => $completedNodes,
+            'progress_percentage' => round($progressPercentage, 2),
+        ]);
     }
 }
