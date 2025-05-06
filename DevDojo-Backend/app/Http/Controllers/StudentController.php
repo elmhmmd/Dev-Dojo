@@ -10,6 +10,7 @@ use App\Models\Option;
 use App\Models\ProjectSubmission;
 use App\Models\QuizStatus;
 use App\Models\ProjectSubmissionUpvote;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
