@@ -11,6 +11,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\KeyLearningObjectiveController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\AdminController;
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
@@ -28,8 +29,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('roadmaps/{roadmap}/nodes/{node}/quiz/{quiz}/submit', [StudentController::class, 'takeQuiz']);
     Route::post('roadmaps/{roadmap}/nodes/{node}/project/{project}/submit', [StudentController::class, 'submitProject']);
     Route::post('roadmaps/{roadmap}/nodes/{node}/project/{project}/submissions/{submission}/upvote', [StudentController::class, 'upvoteSubmission']);
+    Route::get('statistics', [StudentController::class, 'statistics']);
+    Route::get('roadmaps/{roadmap}/progress', [StudentController::class, 'roadmapProgress']);
 
     Route::middleware('admin')->group(function () {
+        Route::get('admin/statistics', [AdminController::class, 'statistics']);
         Route::apiResource('roadmaps', RoadmapController::class)->except(['index']);
         Route::post('roadmaps/{roadmap}/publish', [RoadmapController::class, 'publish']);
         Route::post('roadmaps/{roadmap}/unpublish', [RoadmapController::class, 'unpublish']);
