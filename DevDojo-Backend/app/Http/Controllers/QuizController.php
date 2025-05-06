@@ -29,7 +29,9 @@ class QuizController extends Controller
             'time_limit' => 'nullable|integer',
         ]);
 
-        if ($validated['id']) {
+        $id = $validated['id'] ?? null;
+
+        if ($id) {
             $quiz = Quiz::findOrFail($validated['id']);
             $quiz->update([
                 'time_limit' => $validated['time_limit'],
@@ -44,7 +46,7 @@ class QuizController extends Controller
             ]);
         }
 
-        return response()->json($quiz);
+        return response()->json($quiz, 200);
     }
 
     public function destroy($roadmapId, $nodeId, $quizId)
