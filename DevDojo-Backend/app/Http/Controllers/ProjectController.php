@@ -25,12 +25,14 @@ class ProjectController extends Controller
         $node = Node::findOrFail($nodeId);
 
         $validated = $request->validate([
-            'id' => 'nullable|exists:projects,id',
+            'id' => 'sometimes|nullable|exists:projects,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
-        if ($validated['id']) {
+        $id = $validated['id'] ?? null;
+
+        if ($id) {
             $project = Project::findOrFail($validated['id']);
             $project->update([
                 'title' => $validated['title'],
@@ -47,7 +49,7 @@ class ProjectController extends Controller
             ]);
         }
 
-        return response()->json($project);
+        return response()->json($project, 200);
     }
 
     public function destroy($roadmapId, $nodeId, $projectId)
