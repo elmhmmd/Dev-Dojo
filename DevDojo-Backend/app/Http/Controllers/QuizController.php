@@ -32,7 +32,7 @@ class QuizController extends Controller
         $id = $validated['id'] ?? null;
 
         if ($id) {
-            $quiz = Quiz::findOrFail($validated['id']);
+            $quiz = Quiz::findOrFail($id);
             $quiz->update([
                 'time_limit' => $validated['time_limit'],
             ]);
