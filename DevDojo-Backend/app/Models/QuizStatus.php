@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuizStatus extends Model
 {
-    use HasFactor;
+    use HasFactory;
     
     protected $fillable = ['student_id', 'quiz_id', 'passed'];
 
