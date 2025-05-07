@@ -10,14 +10,26 @@ class OptionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api', 'admin']);
+        $this->middleware(['auth:api', 'admin'])->except(['index']);
     }
 
     public function index($roadmapId, $nodeId, $quizId, $questionId)
     {
-        $question = Question::findOrFail($questionId);
-        $options = $question->options;
-        return response()->json($options, 200);
+        $user = auth()->user();
+
+        $question = Question::with('quiz.node.roadmap')
+                            ->findOrFail($questionId);
+
+        if ($user->role_id !== 1 && ! $question->quiz->node->roadmap->published) {
+            return response()->json([
+                'error' => 'You do not have access to these options'
+            ], 403);
+        }
+
+        return response()->json(
+            $question->options,
+            200
+        );
     }
 
     public function bulkSync(Request $request, $roadmapId, $nodeId, $quizId, $questionId)
