@@ -10,14 +10,26 @@ class QuestionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api', 'admin']);
+        $this->middleware(['auth:api', 'admin'])->except(['index']);
     }
 
     public function index($roadmapId, $nodeId, $quizId)
     {
-        $quiz = Quiz::findOrFail($quizId);
-        $questions = $quiz->questions;
-        return response()->json($questions, 200);
+        $user = auth()->user();
+
+        
+        $quiz = Quiz::with('node.roadmap')->findOrFail($quizId);
+
+        if ($user->role_id !== 1 && ! $quiz->node->roadmap->published) {
+            return response()->json([
+                'error' => 'You do not have access to these questions'
+            ], 403);
+        }
+        
+        return response()->json(
+            $quiz->questions,
+            200
+        );
     }
 
     public function bulkSync(Request $request, $roadmapId, $nodeId, $quizId)
