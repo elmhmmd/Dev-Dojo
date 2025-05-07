@@ -17,7 +17,7 @@ class QuestionController extends Controller
     {
         $user = auth()->user();
 
-        
+       
         $quiz = Quiz::with('node.roadmap')->findOrFail($quizId);
 
         if ($user->role_id !== 1 && ! $quiz->node->roadmap->published) {
@@ -25,7 +25,7 @@ class QuestionController extends Controller
                 'error' => 'You do not have access to these questions'
             ], 403);
         }
-        
+
         return response()->json(
             $quiz->questions,
             200
