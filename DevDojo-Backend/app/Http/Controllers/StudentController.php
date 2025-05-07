@@ -21,68 +21,26 @@ class StudentController extends Controller
         $this->middleware('student');
     }
 
-    public function joinRoadmap(Request $request, $roadmapId)
+    protected function updateNodeCompletion($nodeId)
     {
-        $user = auth()->user();
-        $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
+        $node = Node::findOrFail($nodeId);
 
-        if ($user->roadmaps()->where('roadmap_id', $roadmapId)->exists()) {
-            return response()->json(['error' => 'Already joined this roadmap'], 422);
-        }
+        $quizPassed = QuizStatus::where('quiz_id', $node->quiz->id)
+            ->where('passed', true)
+            ->exists();
 
-        $user->roadmaps()->attach($roadmapId);
+        $projectApproved = ProjectSubmission::where('project_id', $node->project->id)
+            ->where('score', '>=', 5)
+            ->exists();
 
-        return response()->json(['message' => 'Joined roadmap successfully'], 200);
+        $node->update(['completion' => $quizPassed && $projectApproved ? 1 : 0]);
     }
-
-    public function viewUnlockedNodes($roadmapId)
-    {
-        $user = auth()->user();
-        $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
-
-        if (!$user->roadmaps()->where('roadmap_id', $roadmapId)->exists()) {
-            return response()->json(['error' => 'You must join the roadmap first'], 403);
-        }
-
-        $nodes = $roadmap->nodes()->orderBy('id')->get();
-        $unlockedNodes = [];
-
-        foreach ($nodes as $index => $node) {
-            if ($index === 0) {
-                $unlockedNodes[] = $node;
-            } else {
-                $previousNode = $nodes[$index - 1];
-                $quizPassed = QuizStatus::where('student_id', $user->id)
-                    ->where('quiz_id', $previousNode->quiz->id)
-                    ->where('passed', true)
-                    ->exists();
-
-                $projectSubmission = ProjectSubmission::where('student_id', $user->id)
-                    ->where('project_id', $previousNode->project->id)
-                    ->first();
-
-                $projectApproved = $projectSubmission && $projectSubmission->score >= 5;
-
-                if ($quizPassed && $projectApproved) {
-                    $unlockedNodes[] = $node;
-                }
-            }
-        }
-
-        return response()->json($unlockedNodes, 200);
-    }
-
     public function takeQuiz(Request $request, $roadmapId, $nodeId, $quizId)
     {
         $user = auth()->user();
         $quiz = Quiz::findOrFail($quizId);
         $node = Node::findOrFail($nodeId);
         $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
-
-        $unlockedNodes = $this->viewUnlockedNodes($roadmapId)->getData();
-        if (!collect($unlockedNodes)->pluck('id')->contains($nodeId)) {
-            return response()->json(['error' => 'Node is not unlocked'], 403);
-        }
 
         $validated = $request->validate([
             'answers' => 'required|array',
@@ -105,6 +63,8 @@ class StudentController extends Controller
             ['passed' => $passed]
         );
 
+        $this->updateNodeCompletion($nodeId);
+
         return response()->json([
             'message' => $passed ? 'Quiz passed' : 'Quiz failed',
             'score' => $correctAnswers,
@@ -119,13 +79,6 @@ class StudentController extends Controller
         $node = Node::findOrFail($nodeId);
         $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
 
-        
-        $unlockedNodes = $this->viewUnlockedNodes($roadmapId)->getData();
-
-        if (!collect($unlockedNodes)->pluck('id')->contains($nodeId)) {
-            return response()->json(['error' => 'Node is not unlocked'], 403);
-        }
-
         $validated = $request->validate([
             'link' => 'required|url',
         ]);
@@ -134,6 +87,8 @@ class StudentController extends Controller
             ['student_id' => $user->id, 'project_id' => $projectId],
             ['link' => $validated['link'], 'score' => 0]
         );
+
+        $this->updateNodeCompletion($nodeId);
 
         return response()->json($submission, 201);
     }
@@ -168,14 +123,14 @@ class StudentController extends Controller
         $submission->score = $submission->upvotes()->count();
         $submission->save();
 
+        $this->updateNodeCompletion($nodeId);
+
         return response()->json(['message' => 'Upvote recorded', 'new_score' => $submission->score], 200);
     }
 
     public function statistics()
     {
         $user = auth()->user();
-
-        $joinedRoadmaps = $user->roadmaps()->count();
 
         $completedNodes = Node::whereHas('quiz', function ($query) use ($user) {
             $query->whereHas('quizStatuses', function ($q) use ($user) {
@@ -215,7 +170,6 @@ class StudentController extends Controller
             ->sum('score');
 
         return response()->json([
-            'joined_roadmaps' => $joinedRoadmaps,
             'total_nodes_completed' => $completedNodes,
             'total_roadmaps_completed' => $completedRoadmaps,
             'quizzes_passed' => $quizzesPassed,
@@ -228,11 +182,7 @@ class StudentController extends Controller
     {
         $user = auth()->user();
         $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
-
-        if (!$user->roadmaps()->where('roadmap_id', $roadmapId)->exists()) {
-            return response()->json(['error' => 'You must join the roadmap first'], 403);
-        }
-
+        
         $totalNodes = $roadmap->nodes()->count();
 
         $completedNodes = $roadmap->nodes()->whereHas('quiz', function ($query) use ($user) {

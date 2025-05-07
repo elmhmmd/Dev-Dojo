@@ -10,15 +10,10 @@ class ProjectController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api', 'admin']);
+        $this->middleware(['auth:api', 'admin'])->except(['index']);
     }
 
-    public function index($roadmapId, $nodeId)
-    {
-        $node = Node::findOrFail($nodeId);
-        $project = $node->project;
-        return response()->json($project ?: []);
-    }
+
 
     public function bulkSync(Request $request, $roadmapId, $nodeId)
     {
