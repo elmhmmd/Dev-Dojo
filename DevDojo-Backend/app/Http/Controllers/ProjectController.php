@@ -13,7 +13,23 @@ class ProjectController extends Controller
         $this->middleware(['auth:api', 'admin'])->except(['index']);
     }
 
+    public function index($roadmapId, $nodeId)
+    {
+        $user = auth()->user();
 
+        $node = Node::with('roadmap')
+                    ->findOrFail($nodeId);
+        if ($user->role_id !== 1 && ! $node->roadmap->published) {
+            return response()->json([
+                'error' => 'You do not have access to this project'
+            ], 403);
+        }
+
+        return response()->json(
+            $node->project ?: [],
+            200
+        );
+    }
 
     public function bulkSync(Request $request, $roadmapId, $nodeId)
     {
