@@ -9,13 +9,23 @@ class NodeController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api', 'admin']);
+        $this->middleware(['auth:api', 'admin'])->except(['index']);
     }
 
     public function index($roadmapId)
     {
+
+    if (auth()->user()->role_id === 1) {
+        
         $nodes = Node::where('roadmap_id', $roadmapId)->get();
-        return response()->json($nodes, 200);
+    } else {
+        
+        $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
+        $nodes = $roadmap->nodes;
+    }
+
+    return response()->json($nodes, 200);
+    
     }
 
     public function store(Request $request, $roadmapId)
@@ -24,7 +34,6 @@ class NodeController extends Controller
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string',
             'long_description' => 'nullable|string',
-            'icon' => 'nullable|string',
         ]);
 
         $node = Node::create([
@@ -32,7 +41,7 @@ class NodeController extends Controller
             'title' => $validated['title'],
             'short_description' => $validated['short_description'] ?? null,
             'long_description' => $validated['long_description'] ?? null,
-            'icon' => $validated['icon'] ?? null,
+            'completion' => 0,
         ]);
 
         return response()->json($node, 201);
@@ -46,7 +55,6 @@ class NodeController extends Controller
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string',
             'long_description' => 'nullable|string',
-            'icon' => 'nullable|string',
         ]);
 
         $node->update($validated);
