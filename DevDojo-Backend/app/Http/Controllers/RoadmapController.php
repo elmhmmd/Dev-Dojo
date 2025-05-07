@@ -44,11 +44,43 @@ class RoadmapController extends Controller
         return response()->json($roadmap, 201);
     }
 
-    public function show($id)
+    public function index(Request $request)
     {
-        $roadmap = Roadmap::with('nodes')->findOrFail($id);
-        return response()->json($roadmap, 200);
+        if (auth()->user()->role_id === 1) {
+            $roadmaps = Roadmap::select('id', 'title', 'published')->get();
+        } else {
+            $roadmaps = Roadmap::select('id', 'title')->where('published', true)->get();
+        }
+
+        return response()->json($roadmaps, 200);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $roadmap = Roadmap::create([
+            'title' => $validated['title'],
+            'created_by' => auth()->id(),
+        ]);
+
+        return response()->json($roadmap, 201);
+    }
+
+    public function show($id)
+{
+    if (auth()->user()->role_id === 1) {
+        $roadmap = Roadmap::with('nodes')->findOrFail($id);
+    } else {
+        $roadmap = Roadmap::with('nodes')
+            ->where('published', true)
+            ->findOrFail($id);
+    }
+
+    return response()->json($roadmap, 200);
+}
 
     public function update(Request $request, $id)
     {
@@ -117,7 +149,7 @@ class RoadmapController extends Controller
 
         return response()->json(['message' => 'Roadmap published successfully'], 200);
     }
-    
+
     public function unpublish($id)
     {
         $roadmap = Roadmap::findOrFail($id);

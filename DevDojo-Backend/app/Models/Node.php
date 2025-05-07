@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Facotires\HasFactory;
 
 class Node extends Model
 {
-    protected $fillable = ['roadmap_id', 'title', 'short_description', 'long_description', 'icon'];
+    protected $fillable = ['roadmap_id', 'title', 'short_description', 'long_description', 'completion'];
 
     public function roadmap()
     {
