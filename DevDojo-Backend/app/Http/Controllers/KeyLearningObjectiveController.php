@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KeyLearningObjective;
+use App\Models\Node;
 use Illuminate\Http\Request;
 
 class KeyLearningObjectiveController extends Controller

@@ -81,16 +81,24 @@ class RoadmapController extends Controller
 
     public function publish($id)
     {
-        $roadmap = Roadmap::findOrFail($id);
-
+        $roadmap = Roadmap::with('nodes.quiz.questions.options', 'nodes.project', 'nodes.keyLearningObjectives', 'nodes.resources')
+                      ->findOrFail($id);
         
-        foreach ($roadmap->nodes as $node) {
+                      foreach ($roadmap->nodes as $node) {
+                        foreach (['title','short_description','long_description','icon'] as $field) {
+                            if (empty($node->$field)) {
+                                return response()->json([
+                                    'error' => "Node {$node->id} must have a non-empty {$field}"
+                                ], 422);
+                            }
+                        }
             
             if (!$node->quiz) {
                 return response()->json(['error' => "Node {$node->id} is missing a quiz"], 422);
             }
 
             $questions = $node->quiz->questions;
+
             if ($questions->count() !== 10) {
                 return response()->json(['error' => "Node {$node->id} quiz must have exactly 10 questions"], 422);
             }
@@ -102,6 +110,7 @@ class RoadmapController extends Controller
                 }
 
                 $correctOptions = $options->where('is_correct', true)->count();
+
                 if ($correctOptions !== 1) {
                     return response()->json(['error' => "Question {$question->id} in node {$node->id} must have exactly one correct option"], 422);
                 }

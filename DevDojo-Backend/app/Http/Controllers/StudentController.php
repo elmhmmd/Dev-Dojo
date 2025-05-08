@@ -143,7 +143,8 @@ class StudentController extends Controller
         })->count();
 
         
-        $completedRoadmaps = $user->roadmaps()->whereDoesntHave('nodes', function ($query) use ($user) {
+        $completedRoadmaps = Roadmap::where('published', true)
+        ->whereDoesntHave('nodes', function ($query) use ($user) {
             $query->whereDoesntHave('quiz', function ($q) use ($user) {
                 $q->whereHas('quizStatuses', function ($qs) use ($user) {
                     $qs->where('student_id', $user->id)->where('passed', true);
