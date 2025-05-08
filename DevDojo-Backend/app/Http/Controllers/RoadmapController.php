@@ -44,31 +44,6 @@ class RoadmapController extends Controller
         return response()->json($roadmap, 201);
     }
 
-    public function index(Request $request)
-    {
-        if (auth()->user()->role_id === 1) {
-            $roadmaps = Roadmap::select('id', 'title', 'published')->get();
-        } else {
-            $roadmaps = Roadmap::select('id', 'title')->where('published', true)->get();
-        }
-
-        return response()->json($roadmaps, 200);
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-        ]);
-
-        $roadmap = Roadmap::create([
-            'title' => $validated['title'],
-            'created_by' => auth()->id(),
-        ]);
-
-        return response()->json($roadmap, 201);
-    }
-
     public function show($id)
 {
     if (auth()->user()->role_id === 1) {

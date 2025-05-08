@@ -57,11 +57,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Roadmap::class, 'created_by');
     }
 
-    public function roadmaps()
-    {
-        return $this->belongsToMany(Roadmap::class, 'roadmap_user');
-    }
-
     public function quizStatuses()
     {
         return $this->hasMany(QuizStatus::class, 'student_id');
