@@ -206,4 +206,17 @@ class StudentController extends Controller
             'progress_percentage' => round($progressPercentage, 2),
         ]);
     }
+
+    public function getProjectSubmissions($roadmapId, $nodeId, $projectId)
+    {
+        $roadmap = Roadmap::where('published', true)->findOrFail($roadmapId);
+        $node = Node::where('id', $nodeId)->where('roadmap_id', $roadmapId)->firstOrFail();
+        $project = Project::where('id', $projectId)->where('node_id', $nodeId)->firstOrFail();
+
+        $submissions = ProjectSubmission::where('project_id', $projectId)
+            ->select('id', 'student_id', 'project_id', 'link', 'score')
+            ->get();
+
+        return response()->json($submissions, 200);
+    }
 }

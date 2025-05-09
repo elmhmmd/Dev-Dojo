@@ -85,7 +85,7 @@ class RoadmapController extends Controller
                       ->findOrFail($id);
         
                       foreach ($roadmap->nodes as $node) {
-                        foreach (['title','short_description','long_description','icon'] as $field) {
+                        foreach (['title','short_description','long_description'] as $field) {
                             if (empty($node->$field)) {
                                 return response()->json([
                                     'error' => "Node {$node->id} must have a non-empty {$field}"
