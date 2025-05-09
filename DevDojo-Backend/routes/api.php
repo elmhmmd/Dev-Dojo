@@ -35,6 +35,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('roadmaps/{roadmap}/nodes/{node}/quiz/{quiz}/submit', [StudentController::class, 'takeQuiz']);
     Route::post('roadmaps/{roadmap}/nodes/{node}/project/{project}/submit', [StudentController::class, 'submitProject']);
     Route::post('roadmaps/{roadmap}/nodes/{node}/project/{project}/submissions/{submission}/upvote', [StudentController::class, 'upvoteSubmission']);
+    Route::get('roadmaps/{roadmap}/nodes/{node}/project/{project}/submissions', [StudentController::class, 'getProjectSubmissions']);
     Route::get('statistics', [StudentController::class, 'statistics']);
     Route::get('roadmaps/{roadmap}/progress', [StudentController::class, 'roadmapProgress']);
 
