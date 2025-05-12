@@ -1,16 +1,17 @@
 
 ## Plateforme d'Apprentissage en Ligne (DevDojo)
-📚 Aperçu du Projet
+
+**📚 Aperçu du Projet**
 
 DevDojo est une plateforme web éducative permettant aux étudiants de suivre des parcours d'apprentissage structurés, appelés Roadmaps. Chaque Roadmap est composée de modules (nœuds) comprenant des quizzes et des projets. Les étudiants peuvent soumettre des projets, voter pour ceux de leurs pairs et suivre leur progression. Les Administrateurs créent et gèrent les contenus pédagogiques. Construite avec Laravel 12, la plateforme offre une expérience utilisateur fluide et sécurisée via une API RESTful.
 
-Public Cible :
+**Public Cible :**
 
-Étudiants : Accès aux feuilles de route et suivi de leur apprentissage.
+*Étudiants : Accès aux feuilles de route et suivi de leur apprentissage.*
 
-Administrateurs : Gestion des feuilles de route, quizzes, projets et analyse des performances.
+*Administrateurs : Gestion des feuilles de route, quizzes, projets et analyse des performances.*
 
-✨ Fonctionnalités Clés
+**✨ Fonctionnalités Clés**
 
 Pour les Étudiants
 📖 Catalogue des Roadmaps : Exploration des Roadmaps publiées, organisées par thématiques éducatives.
@@ -38,7 +39,7 @@ Pour Administrateurs
 
 🛠️ Technologies Utilisées
 
-Back-end :
+**Back-end :**
 
 PHP (Laravel 12) : Logique métier et API RESTful.
 
@@ -46,9 +47,7 @@ MySQL : Base de données relationnelle pour stocker les utilisateurs, feuilles d
 
 Front-end : NextJS
 
-Outils :
-
-Serveur Apache : Hébergement de l'application.
+**Outils :**
 
 phpMyAdmin : Gestion de la base de données.
 
